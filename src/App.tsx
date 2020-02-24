@@ -1,26 +1,36 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import SeasonDisplay from "./SeasonDisplay";
+import Spinner from "./Spinner";
+
+interface Props {}
+interface State {
+  lat: Coordinates["latitude"] | null;
+  errorMessage: string;
+}
+
+class App extends Component<Props, State> {
+  state = { lat: null, errorMessage: "" };
+
+  componentDidMount() {
+    window.navigator.geolocation.getCurrentPosition(
+      position => this.setState({ lat: position.coords.latitude }),
+      err => this.setState({ errorMessage: err.message })
+    );
+  }
+
+  renderContent = (): JSX.Element => {
+    if (this.state.errorMessage && !this.state.lat) {
+      return <div>Error: {this.state.errorMessage}</div>;
+    } else if (!this.state.errorMessage && this.state.lat) {
+      return <SeasonDisplay lat={this.state.lat} />;
+    }
+    return <Spinner message="Please respond to location request..." />;
+  };
+
+  render() {
+    return <div className="border red">{this.renderContent()}</div>;
+  }
 }
 
 export default App;
